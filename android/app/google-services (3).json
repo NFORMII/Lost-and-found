@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "668985675708",
+    "project_id": "mylafapp",
+    "storage_bucket": "mylafapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:668985675708:android:45f7537a32acfff15c65b9",
+        "android_client_info": {
+          "package_name": "com.example.letsfind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPcDwyUqZG70zeUh5VpY1Gp-nMlDUelK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

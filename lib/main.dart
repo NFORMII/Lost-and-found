@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import './appbar.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'navigation/main_navigation_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const LAFApp());
 }
+
 
 class LAFApp extends StatelessWidget {
   const LAFApp({super.key});
@@ -17,10 +20,7 @@ class LAFApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'LAF',
-      theme: ThemeData(
-        useMaterial3: true,
-        primarySwatch: Colors.indigo,
-      ),
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.indigo),
       home: const MainNavigationWrapper(),
     );
   }

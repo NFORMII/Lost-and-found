@@ -9,6 +9,7 @@ class AllFeedScreen extends StatelessWidget {
     return const CommunityFeed(filter: 'all');
   }
 }
+
 class CustomAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const CustomAppBar({super.key});
