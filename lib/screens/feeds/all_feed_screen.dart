@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:letsfind/widgets/appbar.dart';
 import '../../widgets/community_feed.dart';
 
 class AllFeedScreen extends StatelessWidget {
@@ -8,7 +9,8 @@ class AllFeedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CommunityFeed(filter: 'all');
   }
-}
+  }
+
 
 class CustomAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -16,6 +18,7 @@ class CustomAppBar extends StatelessWidget
 
   @override
   Size get preferredSize => const Size.fromHeight(70);
+
 
   @override
   Widget build(BuildContext context) {

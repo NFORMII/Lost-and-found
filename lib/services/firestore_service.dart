@@ -3,9 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<QuerySnapshot> getItems() {
-    return _db
-        .collection('items')
+  Stream<QuerySnapshot> getItems({String filter = 'all'}) {
+    Query query = _db.collection('items');
+    
+    if (filter != 'all') {
+      query = query.where('status', isEqualTo: filter);
+    }
+    
+    return query
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
@@ -24,4 +29,7 @@ class FirestoreService {
       'timestamp': FieldValue.serverTimestamp(),
     });
   }
+
+  Stream<QuerySnapshot<Object?>>? streamPosts(String filter) {}
+  
 }
