@@ -13,4 +13,6 @@ class StorageService {
     await ref.putFile(file);
     return await ref.getDownloadURL();
   }
+
+  Future<String?> uploadPostImage(File file) async {}
 }

@@ -22,7 +22,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
-          AllFeedScreen(),
+          // AllFeedScreen(),
           LostFeedScreen(),
           FoundFeedScreen(),
           ProfileScreen(),
@@ -47,7 +47,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           BottomNavigationBarItem(
               icon: Icon(Icons.check_circle), label: "Found"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline), label: "Profile"),
+              icon: Icon(Icons.message), label: "Messages"),
         ],
       ),
     );
