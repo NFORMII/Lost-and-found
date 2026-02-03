@@ -7,8 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'edit_profile_screen.dart';
-import 'my_posts_screen.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -160,12 +159,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final email = data['email'] ?? '';
 
         return Container(
-          padding: const EdgeInsets.only(top: 60, bottom: 40),
+          padding: const EdgeInsets.only(top: 60, bottom: 70, left: 150, right: 150),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
             ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
           ),
           child: Column(
             children: [
@@ -197,9 +196,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(email, style: const TextStyle(color: Colors.white70)),
               TextButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                    '/edit-profile',
                   );
                 },
                 child: const Text("Edit Profile",
@@ -221,12 +220,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.article_outlined,
             title: "My Posts",
             onTap: () {
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(builder: (_) => const MyPostsScreen()),
+                '/my-posts',
               );
             },
           ),
+          
           _buildNotificationTile(),
           _buildTile(
             icon: Icons.logout,

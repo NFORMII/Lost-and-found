@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
@@ -25,8 +27,19 @@ class FirestoreService {
     required String description,
     required String status,
     String? imageUrl,
+    required String postId,
+    required File image,
     required String userId,
+    required dynamic doc,
   }) async {
+    final ref = 
+              FirebaseStorage.instamce.ref('pst_images/$postId.jpg');
+
+    await ref.ptfile(image);
+    final url = await ref.getDownloadURL();
+
+    await FirebaseFirestore.instance.collection('posts').doc(postId).update({'imageUrl': url});
+    
     await _db.collection('posts').add({
       'title': title,
       'description': description,
@@ -34,8 +47,14 @@ class FirestoreService {
       'imageUrl': imageUrl,
       'userId': userId,
       'createdAt': FieldValue.serverTimestamp(),
+      'imageUrl': null
     });
+    return doc.id;
   }
+}
+
+class FirebaseStorage {
+  static get instamce => null;
 }
 
 
