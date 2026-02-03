@@ -1,1 +1,40 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"mylafapp","appId":"1:668985675708:android:45f7537a32acfff15c65b9","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"mylafapp","configurations":{"android":"1:668985675708:android:45f7537a32acfff15c65b9","ios":"1:668985675708:ios:0ad135c9bdc76e735c65b9","macos":"1:668985675708:ios:0ad135c9bdc76e735c65b9","web":"1:668985675708:web:33457b65d45e455e5c65b9","windows":"1:668985675708:web:f86f55fa3a64bf715c65b9"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "mylafapp",
+          "appId": "1:668985675708:android:45f7537a32acfff15c65b9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "mylafapp",
+          "configurations": {
+            "android": "1:668985675708:android:45f7537a32acfff15c65b9",
+            "ios": "1:668985675708:ios:0ad135c9bdc76e735c65b9",
+            "macos": "1:668985675708:ios:0ad135c9bdc76e735c65b9",
+            "web": "1:668985675708:web:33457b65d45e455e5c65b9",
+            "windows": "1:668985675708:web:f86f55fa3a64bf715c65b9"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 1
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

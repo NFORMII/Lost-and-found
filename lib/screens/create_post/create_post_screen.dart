@@ -1,19 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 
-import '../../auth/login_screen.dart' show LoginScreen; // make sure this path is correct
+import '../../auth/login_screen.dart';
 
 class CreatePostScreen extends StatefulWidget {
   final String imagePath;
 
-  const CreatePostScreen({
-    super.key,
-    required this.imagePath,
-  });
+  const CreatePostScreen({super.key, required this.imagePath});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -29,7 +26,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   /// 🔐 Auth gate before upload
   void _handleSubmit() {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user == null) {
       _showSignupRequiredDialog();
     } else {
@@ -47,23 +43,39 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           "Please sign up or log in to upload an item.",
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
             },
             child: const Text("Sign up / Login"),
           ),
         ],
       ),
     );
+  }
+
+  /// 🚀 Upload image to Cloudinary
+  Future<String?> _uploadToCloudinary(File file) async {
+    const cloudName = "dhuqoz85q";
+    const uploadPreset = "";
+
+    final uri = Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload");
+    final request = http.MultipartRequest('POST', uri)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(resBody);
+      return data['secure_url']; // This is the image URL
+    } else {
+      debugPrint("Cloudinary upload failed: $resBody");
+      return null;
+    }
   }
 
   /// 🚀 Actual upload logic (only runs if logged in)
@@ -78,45 +90,38 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => isUploading = true);
 
     try {
-      // 1️⃣ Upload image to Firebase Storage
+      // 1️⃣ Upload to Cloudinary
       final File imageFile = File(widget.imagePath);
-      final String fileName =
-          'posts/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final imageUrl = await _uploadToCloudinary(imageFile);
 
-      final UploadTask uploadTask =
-          FirebaseStorage.instance.ref(fileName).putFile(imageFile);
+      if (imageUrl == null) {
+        throw "Image upload failed!";
+      }
 
-      final TaskSnapshot snapshot = await uploadTask;
-      final String downloadUrl = await snapshot.ref.getDownloadURL();
-
-      // 2️⃣ Save post data to Firestore
+      // 2️⃣ Save post to Firestore
       await FirebaseFirestore.instance.collection('posts').add({
         'title': titleController.text.trim(),
         'description': descController.text.trim(),
         'category': selectedCategory,
-        'imageUrl': downloadUrl,
-        'userId': userId, // 🔐 Firebase Auth UID
+        'imageUrl': imageUrl,
+        'userId': userId,
         'status': 'lost',
         'createdAt': FieldValue.serverTimestamp(),
         'seenAt': DateTime.now(),
       });
 
       if (!mounted) return;
-
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Post created successfully!")),
       );
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Upload failed: $e")),
       );
     } finally {
-      if (mounted) {
-        setState(() => isUploading = false);
-      }
+      if (mounted) setState(() => isUploading = false);
     }
   }
 
@@ -130,9 +135,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Describe the item"),
-      ),
+      appBar: AppBar(title: const Text("Describe the item")),
       body: isUploading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -149,7 +152,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   TextField(
                     controller: titleController,
                     decoration: const InputDecoration(
@@ -158,7 +160,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
                   TextField(
                     controller: descController,
                     maxLines: 3,
@@ -168,26 +169,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
                   DropdownButtonFormField<String>(
                     value: selectedCategory,
-                    items: const [
-                      "electronics",
-                      "documents",
-                      "pets",
-                      "others",
-                    ]
-                        .map(
-                          (c) => DropdownMenuItem(
-                            value: c,
-                            child: Text(c.toUpperCase()),
-                          ),
-                        )
+                    items: const ["electronics", "documents", "pets", "others"]
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c.toUpperCase())))
                         .toList(),
                     onChanged: (val) {
-                      if (val != null) {
-                        setState(() => selectedCategory = val);
-                      }
+                      if (val != null) setState(() => selectedCategory = val);
                     },
                     decoration: const InputDecoration(
                       labelText: "Category",
@@ -195,12 +183,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _handleSubmit, // 🔐 gated
+                      onPressed: _handleSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         foregroundColor: Colors.white,

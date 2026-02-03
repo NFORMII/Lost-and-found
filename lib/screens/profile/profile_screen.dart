@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  // 📸 PROFILE PHOTO UPLOAD
+  
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  // ❌ DELETE ACCOUNT (FULL)
+  
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
