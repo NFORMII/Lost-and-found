@@ -4,10 +4,13 @@ import 'firebase_options.dart';
 import 'navigation/main_navigation_wrapper.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  //  framework is ready
+  WidgetsFlutterBinding.ensureInitialized(); 
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   runApp(const LAFApp());
 }
 

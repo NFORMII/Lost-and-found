@@ -69,11 +69,11 @@ class CommunityFeed extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               children: [
                 _buildCategoryChip("All", isSelected: true),
+                _buildCategoryChip("Documents"),
                 _buildCategoryChip("Electronics"),
                 _buildCategoryChip("Wallets"),
-                _buildCategoryChip("Keys"),
+                _buildCategoryChip("kKeys"),
                 _buildCategoryChip("Pets"),
-                _buildCategoryChip("Documents"),
               ],
             ),
           ),

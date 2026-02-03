@@ -48,6 +48,7 @@ dev_dependencies:
   firebase_storage: ^11.6.5
   firebase_auth: ^4.17.4
   firebase_analytics: ^10.10.7
+  shared_preferences: ^2.3.5
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
