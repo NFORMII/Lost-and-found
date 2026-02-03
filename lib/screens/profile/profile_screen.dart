@@ -7,6 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'edit_profile_screen.dart';
+import 'my_posts_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -50,16 +53,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
-
     if (picked == null) return;
 
     final file = File(picked.path);
-    final ref = FirebaseStorage.instance
-        .ref('profile_photos/${_user.uid}.jpg');
+    final ref =
+        FirebaseStorage.instance.ref('profile_photos/${_user.uid}.jpg');
 
     await ref.putFile(file);
     final url = await ref.getDownloadURL();
@@ -72,22 +73,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _photoUrl = url);
   }
 
-  // 🔓 LOGOUT
   Future<void> _logout() async {
     await FirebaseAuth.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Delete Account"),
         content: const Text(
-          "This will permanently delete your account and all your data. This action cannot be undone.",
-        ),
+            "This action is permanent. All your data will be deleted."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -105,30 +103,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirmed != true) return;
 
     try {
-      // Delete Firestore profile
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_user.uid)
           .delete();
 
-      // Delete profile photo
       await FirebaseStorage.instance
           .ref('profile_photos/${_user.uid}.jpg')
           .delete()
           .catchError((_) {});
 
-      // Delete Auth user
       await _user.delete();
 
       if (!mounted) return;
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } catch (e) {
+    } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Re-login required before deleting account.",
-          ),
-        ),
+        const SnackBar(
+            content: Text("Please re-login before deleting your account.")),
       );
     }
   }
@@ -136,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -168,33 +160,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final email = data['email'] ?? '';
 
         return Container(
-          padding: const EdgeInsets.only(top: 60, bottom: 30),
+          padding: const EdgeInsets.only(top: 60, bottom: 40),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            gradient: LinearGradient(
+              colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
+            ),
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
           ),
           child: Column(
             children: [
               GestureDetector(
                 onTap: _pickAndUploadPhoto,
                 child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: const Color(0xFFEDE7F6),
-                  backgroundImage:
-                      _photoUrl != null ? NetworkImage(_photoUrl!) : null,
-                  child: _photoUrl == null
-                      ? const Icon(Icons.camera_alt,
-                          size: 32, color: Colors.deepPurple)
-                      : null,
+                  radius: 52,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 48,
+                    backgroundImage:
+                        _photoUrl != null ? NetworkImage(_photoUrl!) : null,
+                    child: _photoUrl == null
+                        ? const Icon(Icons.camera_alt,
+                            size: 30, color: Colors.deepPurple)
+                        : null,
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(name,
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 14),
+              Text(
+                name,
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
               const SizedBox(height: 4),
-              Text(email, style: TextStyle(color: Colors.grey[600])),
+              Text(email, style: const TextStyle(color: Colors.white70)),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                  );
+                },
+                child: const Text("Edit Profile",
+                    style: TextStyle(color: Colors.white)),
+              ),
             ],
           ),
         );
@@ -206,21 +216,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Settings",
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple)),
-          const SizedBox(height: 12),
+          _buildTile(
+            icon: Icons.article_outlined,
+            title: "My Posts",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MyPostsScreen()),
+              );
+            },
+          ),
           _buildNotificationTile(),
-          _buildProfileTile(
+          _buildTile(
             icon: Icons.logout,
             title: "Logout",
             onTap: _logout,
           ),
-          _buildProfileTile(
+          const SizedBox(height: 16),
+          _buildTile(
             icon: Icons.delete_forever,
             title: "Delete Account",
             onTap: _deleteAccount,
@@ -231,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileTile({
+  Widget _buildTile({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -247,8 +261,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: Icon(icon, color: danger ? Colors.red : Colors.deepPurple),
         title: Text(title,
             style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: danger ? Colors.red : Colors.black)),
+                color: danger ? Colors.red : Colors.black,
+                fontWeight: FontWeight.w500)),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),
@@ -267,8 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.deepPurple),
         title: const Text("Push Notifications"),
         value: _notificationsEnabled,
-        activeColor: Colors.deepPurple,
-        onChanged: _toggleNotifications,
+        onChanged: (value) { _toggleNotifications(value); },
       ),
     );
   }
