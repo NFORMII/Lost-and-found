@@ -19,6 +19,7 @@ class CreatePostScreen extends StatefulWidget {
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final titleController = TextEditingController();
   final descController = TextEditingController();
+  final category = TextEditingController();
 
   String selectedCategory = "electronics";
   bool isUploading = false;
@@ -76,7 +77,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return null;
   }
 
-  /// ✅ NEW: Create Firestore post FIRST
+  /// NEW: Create Firestore post FIRST
   Future<void> _createPost(String userId) async {
     if (titleController.text.isEmpty ||
         descController.text.isEmpty) {
@@ -95,13 +96,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         'title': titleController.text.trim(),
         'description': descController.text.trim(),
         'category': selectedCategory,
-        'imageUrl': null, // 👈 placeholder
+        'imageUrl': null, // +placeholder
         'userId': userId,
-        'status': 'lost',
+        'status': 'found',
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // 2️⃣ Upload image ONLY if user selected one
+    // 2Upload image ONLY if user selected one
       if (widget.imagePath != null) {
         final imageFile = File(widget.imagePath!);
         final imageUrl = await _uploadToCloudinary(imageFile);
@@ -128,6 +129,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(title: const Text("Describe the item")),
       body: isUploading
           ? const Center(child: CircularProgressIndicator())
@@ -149,15 +151,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   TextField(
                     controller: titleController,
                     decoration: const InputDecoration(
-                      labelText: "What did you find/lose?",
+                      labelText: "What did you find?",
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
+                    controller: category,
+                    decoration: const InputDecoration(labelText: 'Category(documents, electronics, wallets, keys, pets)')
+                  ),
+                  TextField(
                     controller: descController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: const InputDecoration
+                    
+                    (
                       labelText: "Description",
                       border: OutlineInputBorder(),
                     ),
@@ -168,6 +176,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     items: const [
                       "electronics",
                       "documents",
+                      'Wallets'
                       "pets",
                       "others"
                     ]

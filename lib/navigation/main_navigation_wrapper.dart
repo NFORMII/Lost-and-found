@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../screens/feeds/all_feed_screen.dart';
-import '../screens/feeds/lost_feed_screen.dart';
-import '../screens/feeds/found_feed_screen.dart';
+import 'package:letsfind/screens/feeds/messages_screen.dart';
+import 'package:letsfind/widgets/community_feed.dart';
 import '../screens/profile/profile_screen.dart';
 import '../widgets/create_post_sheet.dart';
 
@@ -23,9 +22,11 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         index: _selectedIndex,
         children: const [
           // AllFeedScreen(),
-          LostFeedScreen(),
-          FoundFeedScreen(),
-          ProfileScreen(),
+          // LostFeedScreen(),
+          // FoundFeedScreen(),
+          CommunityFeed (filter: 'filter',),
+          MessagesScreen()
+        
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -42,10 +43,10 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.grid_view), label: "All"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.location_off), label: "Lost"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle), label: "Found"),
+          // BottomNavigationBarItem(
+          //     icon: Icon(Icons.location_off), label: "Lost"),
+          // BottomNavigationBarItem(
+          //     icon: Icon(Icons.check_circle), label: "Found"),
           BottomNavigationBarItem(
               icon: Icon(Icons.message), label: "Messages"),
         ],

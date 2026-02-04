@@ -7,8 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -28,6 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfilePhoto();
   }
 
+  // Load notification toggle from SharedPreferences
   Future<void> _loadNotificationSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -41,34 +40,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _notificationsEnabled = value);
   }
 
+  // Load profile photo from Firestore
   Future<void> _loadProfilePhoto() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_user.uid)
-        .get();
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(_user.uid).get();
 
     setState(() {
-      _photoUrl = doc.data()?['photoUrl'];
+      _photoUrl = doc.data()?['photoUrl'] as String?;
     });
   }
 
+  // Pick image from gallery and upload to Firebase Storage
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
 
     final file = File(picked.path);
-    final ref =
-        FirebaseStorage.instance.ref('profile_photos/${_user.uid}.jpg');
+    final ref = FirebaseStorage.instance.ref('profile_photos/${_user.uid}.jpg');
 
+    // Upload file
     await ref.putFile(file);
+
+    // Get download URL
     final url = await ref.getDownloadURL();
 
+    // Update Firestore
     await FirebaseFirestore.instance
         .collection('users')
         .doc(_user.uid)
         .update({'photoUrl': url});
 
+    // Update state to refresh UI
     setState(() => _photoUrl = url);
   }
 
@@ -77,6 +80,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
+
+  get route => null;
 
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
@@ -102,20 +107,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirmed != true) return;
 
     try {
+      // Delete Firestore document
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_user.uid)
           .delete();
 
+      // Delete profile photo in storage
       await FirebaseStorage.instance
           .ref('profile_photos/${_user.uid}.jpg')
           .delete()
           .catchError((_) {});
 
+      // Delete Firebase Auth user
       await _user.delete();
 
       if (!mounted) return;
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).popUntil((route).isFirst);
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -128,6 +136,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        backgroundColor: Colors.deepPurple,
+        title: const Text("Profile"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -142,29 +158,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildHeader() {
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user.uid)
-          .get(),
+      future:
+          FirebaseFirestore.instance.collection('users').doc(_user.uid).get(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
-            padding: EdgeInsets.only(top: 80),
+            padding: EdgeInsets.only(top: 20),
             child: CircularProgressIndicator(),
           );
         }
 
+        if (!snapshot.hasData || snapshot.data!.data() == null) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Text('User data not found'),
+            ),
+          );
+        }
+
         final data = snapshot.data!.data() as Map<String, dynamic>;
+
         final name = data['name'] ?? 'Anonymous';
         final email = data['email'] ?? '';
 
         return Container(
-          padding: const EdgeInsets.only(top: 60, bottom: 70, left: 150, right: 150),
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
             ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
           ),
           child: Column(
             children: [
@@ -196,10 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(email, style: const TextStyle(color: Colors.white70)),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/edit-profile',
-                  );
+                  Navigator.pushNamed(context, '/edit-profile');
                 },
                 child: const Text("Edit Profile",
                     style: TextStyle(color: Colors.white)),
@@ -220,13 +240,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.article_outlined,
             title: "My Posts",
             onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/my-posts',
-              );
+              Navigator.pushNamed(context, '/my-posts');
             },
           ),
-          
           _buildNotificationTile(),
           _buildTile(
             icon: Icons.logout,
@@ -281,7 +297,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.deepPurple),
         title: const Text("Push Notifications"),
         value: _notificationsEnabled,
-        onChanged: (value) { _toggleNotifications(value); },
+        onChanged: (value) {
+          _toggleNotifications(value);
+        },
       ),
     );
   }

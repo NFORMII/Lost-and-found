@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class FirestoreService {
   final _db = FirebaseFirestore.instance;
@@ -30,10 +31,11 @@ class FirestoreService {
     required String postId,
     required File image,
     required String userId,
+    required String category,
     required dynamic doc,
   }) async {
     final ref = 
-              FirebaseStorage.instamce.ref('pst_images/$postId.jpg');
+              FirebaseStorage.instance.ref('pst_images/$postId.jpg');
 
     await ref.ptfile(image);
     final url = await ref.getDownloadURL();
@@ -44,6 +46,7 @@ class FirestoreService {
       'title': title,
       'description': description,
       'status': status,
+      'category': category.text.tolowercase(),
       'imageUrl': imageUrl,
       'userId': userId,
       'createdAt': FieldValue.serverTimestamp(),
@@ -53,8 +56,12 @@ class FirestoreService {
   }
 }
 
+extension on String {
+  get text => null;
+}
+
 class FirebaseStorage {
-  static get instamce => null;
+  static get instance => null;
 }
 
 
